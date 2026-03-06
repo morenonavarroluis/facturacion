@@ -1,4 +1,4 @@
-{% load i18n static admin_material %}
+{% load static %}
 
 <aside style="z-index: 1;" class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2" id="sidenav-main">
     <div class="sidenav-header">
@@ -13,7 +13,7 @@
     <hr class="horizontal dark mt-0 mb-2">
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
-        {% admin_get_menu as app_list %}
+        
         {% if app_list %}
           {% for app in app_list %}
             {% if app.has_perms and not app.pinned %}
@@ -147,19 +147,14 @@
             <span class="nav-link-text ms-1">Sign In</span>
           </a>
         </li>
-        <li class="nav-item">
+        {% comment %} <li class="nav-item">
           <a class="nav-link text-dark" href="{% url "register" %}">
             <i class="material-symbols-rounded opacity-5">assignment</i>
             <span class="nav-link-text ms-1">Sign Up</span>
           </a>
-        </li>
+        </li> {% endcomment %}
         {% endif %}
       </ul>
     </div>
-    <div class="sidenav-footer position-absolute w-100 bottom-0 ">
-      <div class="mx-3">
-        <a class="btn btn-outline-dark mt-4 w-100" href="https://app-generator.dev/docs/products/django/material-dashboard/index.html" type="button">Documentation</a>
-        <a class="btn bg-gradient-dark w-100" href="https://app-generator.dev/product/material-dashboard/django/" type="button">Download</a>
-      </div>
-    </div>
+   
 </aside>

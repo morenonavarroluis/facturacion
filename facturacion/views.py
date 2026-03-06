@@ -1,16 +1,49 @@
 from django.shortcuts import render, redirect
-from admin_material.forms import LoginForm, RegistrationForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
+from .forms import LoginForm, RegistrationForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout
 from django.contrib.auth import views as auth_views
-
+from django.contrib.auth import login as auth_login
 # Create your views here.
 
+def login(request):
+  if request.method == 'POST':
+    form = LoginForm(request, data=request.POST)
+    if form.is_valid():
+      user = form.get_user()
+      auth_login(request, user)
+      print('Login successful!')
+      return redirect('/index')
+    else:
+      print("Login failed!")
+  else:
+    form = LoginForm()
+  
+  context = {'form': form}
+  return render(request, 'pages/sign-in.html', context)
 
 def index(request):
     context = {
         'segment': 'dashboard'
     }
     return render(request, 'pages/index.html', context)
+
+def dynamic_api(request):
+    context = {
+        'segment': 'dynamic_api'
+    }
+    return render(request, 'dyn_api/index.html', context)
+
+def dynamic_dt(request):
+    context = {
+        'segment': 'dynamic_dt'
+    }
+    return render(request, 'dyn_dt/index.html', context)
+
+def charts(request):
+    context = {
+        'segment': 'charts'
+    }
+    return render(request, 'charts/index.html', context)
 
 def tables(request):
     context = {
@@ -75,42 +108,39 @@ def template(request):
     return render(request, 'pages/template.html', context)
 
 
-class UserLoginView(auth_views.LoginView):
-  template_name = 'pages/sign-in.html'
-  form_class = LoginForm
-  success_url = '/'
 
-def register(request):
-  if request.method == 'POST':
-    form = RegistrationForm(request.POST)
-    if form.is_valid():
-      form.save()
-      print('Account created successfully!')
-      return redirect('/accounts/login/')
-    else:
-      print("Registration failed!")
-  else:
-    form = RegistrationForm()
+
+# def register(request):
+#   if request.method == 'POST':
+#     form = RegistrationForm(request.POST)
+#     if form.is_valid():
+#       form.save()
+#       print('Account created successfully!')
+#       return redirect('/accounts/login/')
+#     else:
+#       print("Registration failed!")
+#   else:
+#     form = RegistrationForm()
   
-  context = {'form': form}
-  return render(request, 'pages/sign-up.html', context)
+#   context = {'form': form}
+#   return render(request, 'pages/sign-up.html', context)
 
 
-class UserPasswordResetView(auth_views.PasswordResetView):
-  template_name = 'accounts/forgot-password.html'
-  form_class = UserPasswordResetForm
+# class UserPasswordResetView(auth_views.PasswordResetView):
+#   template_name = 'accounts/forgot-password.html'
+#   form_class = UserPasswordResetForm
 
 
-class UserPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
-  template_name = 'accounts/recover-password.html'
-  form_class = UserSetPasswordForm
+# class UserPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+#   template_name = 'accounts/recover-password.html'
+#   form_class = UserSetPasswordForm
 
 
-class UserPasswordChangeView(auth_views.PasswordChangeView):
-  template_name = 'accounts/password_change.html'
-  form_class = UserPasswordChangeForm
+# class UserPasswordChangeView(auth_views.PasswordChangeView):
+#   template_name = 'accounts/password_change.html'
+#   form_class = UserPasswordChangeForm
 
 
 def user_logout_view(request):
   logout(request)
-  return redirect('/accounts/login/')
+  return redirect('login')
