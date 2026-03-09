@@ -3,6 +3,7 @@ from .forms import LoginForm, RegistrationForm, UserPasswordResetForm, UserSetPa
 from django.contrib.auth import logout
 from django.contrib.auth import views as auth_views
 from django.contrib.auth import login as auth_login
+from django.contrib.auth.models import User
 # Create your views here.
 
 def login(request):
@@ -46,10 +47,37 @@ def charts(request):
     return render(request, 'charts/index.html', context)
 
 def tables(request):
+    usuarios = User.objects.all()
     context = {
-        'segment': 'tables'
+        'segment': 'tables',
+        'usuarios': usuarios
     }
     return render(request, 'pages/tables.html', context)
+
+def registrar_usuario(request):
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        if not username or not email or not password or not first_name or not last_name:
+            print("All fields are required!")
+            return redirect('/index')
+        try:
+            new_user = User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name)
+            new_user.save()
+            print('User created successfully!')
+            return redirect('/tables')
+        except Exception as e:
+            print(f"Error creating user: {e}")
+            return redirect('/index')
+    else:
+        print("Invalid request method!")
+        return redirect('/index')
+        
+    
 
 
 def billing(request):

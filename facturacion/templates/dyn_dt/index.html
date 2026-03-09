@@ -1,38 +1,84 @@
 {% extends "layouts/base.html" %}
 {% load static %}
 
-{% block title %} {% if page_title %} page_title {% else %} Dynamic DataTables {% endif %} {% endblock title %} 
-
 {% block content %}
 
-<div class="container-fluid py-2">
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>
-                        Available Routes - defined in <strong>settings.DYNAMIC_DATATB</strong> - Read <a target="" href="https://app-generator.dev/docs/developer-tools/dynamic-datatables.html">Documentation</a>.
-                    </h5>
+    <div class="container-fluid py-2">
+      <div class="row">
+        <div class="col-12">
+          <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4  z-index-2">
+              <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3 d-flex align-items-center justify-content-between px-3">
+                <h6 class="text-white text-capitalize m-0">Clientes</h6>
+                
+                <div>
+                  <button class="btn btn-primary btn-sm mb-0" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Registrar clientes
+                  </button>
                 </div>
-                <div class="card-body">
-                    <ul>
-                        {% for link in routes %}
-                            <li>
-                                <a href="{% url "model_dt" link %}">{{ link }}</a>
-                            </li>    
-                        {% endfor %}
-                    </ul>
-                </div>
+              </div>
             </div>
+             {% include 'modales/clientes.html' %}
+            </div>
+            <div class="card-body px-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nombre</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Usuario</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Employed</th>
+                      <th class="text-secondary opacity-7">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    
+                  {% for usuario in usuarios %}
+                    <tr>
+                      <td>
+                        <div class="d-flex px-2 py-1">
+                          <div>
+                            <img src="{% static 'assets/img/team-2.jpg' %}" class="avatar avatar-sm me-3 border-radius-lg" alt="user_image">
+                          </div>
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">{{ usuario.first_name }} {{ usuario.last_name }}</h6>
+                            <p class="text-xs text-secondary mb-0">{{ usuario.email }}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <p class="text-xs font-weight-bold mb-0">{{ usuario.username }}</p>
+                      </td>
+                      <td class="align-middle text-center text-sm">
+                        {% if usuario.is_active %}
+                          <span class="badge badge-sm bg-gradient-success">Activo</span>
+                        {% else %}
+                          <span class="badge badge-sm bg-gradient-secondary">Inactivo</span>
+                        {% endif %}
+                      </td>
+                      <td class="align-middle text-center">
+                        <span class="text-secondary text-xs font-weight-bold">
+                          {{ usuario.date_joined|date:"d/m/y" }}
+                        </span>
+                      </td>
+                      <td class="align-middle">
+                        <a href="" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" title="Editar usuario">
+                          Editar
+                        </a>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                                      
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+     
+      {% include "includes/footer.html" %}
     </div>
-</div> 
-
+  
 {% endblock content %}
-
-
-{% block extra_js %}
-
-<script src="{% static 'assets/js/plugins/apexcharts.min.js' %}"></script>
-
-{% endblock extra_js %}
