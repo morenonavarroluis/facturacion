@@ -7,6 +7,7 @@ urlpatterns = [
     path('', RedirectView.as_view(url='login/', permanent=False), name='index'),
     path('index', views.index, name="index"),
     path('tables/', views.tables, name="tables"),
+    path('registrar_usuario/', views.registrar_usuario, name="registrar_usuario"),
     path('billing/', views.billing, name="billing"),
     path('virtual-reality/', views.virtual_reality, name="virtual_reality"),
     path('rtl/', views.rtl, name="rtl"),
