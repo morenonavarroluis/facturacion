@@ -18,7 +18,8 @@ urlpatterns = [
     path('typography/', views.typography, name="typography"),
     path('template/', views.template, name="template"),
     path('dynamic-api/', views.dynamic_api, name="dynamic_api"),
-    path('dynamic-dt/', views.dynamic_dt, name="dynamic_dt"),
+    path('clientes/', views.clientes, name="clientes"),
+    path('registrar_clientes/', views.registrar_clientes, name="registrar_clientes"),
     path('charts/', views.charts, name="charts"),
 
     # Authentication

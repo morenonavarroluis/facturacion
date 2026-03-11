@@ -3,7 +3,8 @@ from .forms import LoginForm, RegistrationForm, UserPasswordResetForm, UserSetPa
 from django.contrib.auth import logout
 from django.contrib.auth import views as auth_views
 from django.contrib.auth import login as auth_login
-from django.contrib.auth.models import User
+from django.contrib.auth.models import *
+from .models import *
 # Create your views here.
 
 def login(request):
@@ -34,11 +35,50 @@ def dynamic_api(request):
     }
     return render(request, 'dyn_api/index.html', context)
 
-def dynamic_dt(request):
+def clientes(request):
+    clientes = Cliente.objects.all()
+    tipo = tipo_documnento.objects.all()
     context = {
-        'segment': 'dynamic_dt'
+        'segment': 'clientes',
+        'clientes': clientes,
+        'tipos_documento': tipo
     }
-    return render(request, 'dyn_dt/index.html', context)
+    return render(request, 'Clientes/index.html', context)
+
+def registrar_clientes(request):
+    if request.method == 'POST':
+        id_tipo_doc = request.POST.get('tipo_documento')
+        numero_documento = request.POST.get('numero_documento')
+        nombre = request.POST.get('nombre_apellido')
+        
+        email = request.POST.get('email')
+        telefono = request.POST.get('telefono') 
+        direccion = request.POST.get('direccion')
+        fecha_registro = request.POST.get('fecha_registro')
+        esta_activo = True if request.POST.get('activo') == '1' else False
+        
+        
+        try:
+           new_client = Cliente.objects.create(
+                tipo_documento_id=id_tipo_doc,
+                numero_documento=numero_documento,
+                nombre=nombre,
+                apellidos="",
+                email=email,
+                telefono=telefono,
+                direccion=direccion,
+                fecha_registro=fecha_registro,
+                activo=esta_activo
+            )
+           new_client.save()
+           print('Client created successfully!')
+           return redirect('/clientes')
+        except Exception as e:
+            print(f"Error creating client: {e}")
+            return redirect('/index')
+    else:
+        print("Invalid request method!")
+        return redirect('/index')
 
 def charts(request):
     context = {
