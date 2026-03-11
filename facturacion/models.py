@@ -45,7 +45,7 @@ class Producto(models.Model):
     precio_venta = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField()
     stock_minimo = models.IntegerField()
-    imagen = models.CharField(max_length=100) # O models.ImageField si manejas archivos
+    imagen = models.ImageField(upload_to='productos/', null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     activo = models.BooleanField(default=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)

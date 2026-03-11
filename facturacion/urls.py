@@ -2,6 +2,8 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 from django.views.generic.base import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', RedirectView.as_view(url='login/', permanent=False), name='index'),
@@ -17,7 +19,8 @@ urlpatterns = [
     path('icons/', views.icons, name="icons"),
     path('typography/', views.typography, name="typography"),
     path('template/', views.template, name="template"),
-    path('dynamic-api/', views.dynamic_api, name="dynamic_api"),
+    path('productos/', views.productos, name="productos"),
+    path('crear_producto/', views.crear_producto, name="crear_producto"),
     path('clientes/', views.clientes, name="clientes"),
     path('registrar_clientes/', views.registrar_clientes, name="registrar_clientes"),
     path('charts/', views.charts, name="charts"),
@@ -39,4 +42,4 @@ urlpatterns = [
     # path('accounts/password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(
     #     template_name='pages/password_reset_complete.html'
     # ), name='password_reset_complete'),
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
