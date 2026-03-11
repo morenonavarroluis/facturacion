@@ -3,7 +3,8 @@ from .forms import LoginForm, RegistrationForm, UserPasswordResetForm, UserSetPa
 from django.contrib.auth import logout
 from django.contrib.auth import views as auth_views
 from django.contrib.auth import login as auth_login
-from django.contrib.auth.models import User
+from django.contrib.auth.models import *
+from .models import *
 # Create your views here.
 
 def login(request):
@@ -28,17 +29,105 @@ def index(request):
     }
     return render(request, 'pages/index.html', context)
 
-def dynamic_api(request):
+def productos(request):
+    
+    productos = Producto.objects.all()   
+    categorias = Categoria.objects.all()       
     context = {
-        'segment': 'dynamic_api'
+        'segment': 'productos',
+        'productos': productos,
+        'categorias': categorias
     }
-    return render(request, 'dyn_api/index.html', context)
+    return render(request, 'Productos/index.html', context)
 
-def dynamic_dt(request):
+from django.shortcuts import redirect
+from .models import Producto, Categoria
+
+def crear_producto(request):
+    if request.method == 'POST':
+        # 1. Captura de todos los campos del formulario
+        codigo = request.POST.get('codigo')
+        nombre = request.POST.get('nombre')
+        descripcion = request.POST.get('descripcion')
+        precio_compra = request.POST.get('precio_compra')
+        precio_venta = request.POST.get('precio_venta')
+        stock = request.POST.get('stock')
+        stock_minimo = request.POST.get('stock_minimo')
+        categoria_id = request.POST.get('categoria')
+        
+        # Manejo del checkbox (booleanos en Django)
+        activo = True if request.POST.get('activo') == 'on' else False
+        
+        # 2. Captura de la imagen (requiere request.FILES)
+        imagen = request.FILES.get('imagen')
+
+        try:
+            # 3. Creación con los nombres exactos de tu modelo/base de datos
+            new_producto = Producto.objects.create(
+                codigo=codigo,                     # Faltaba
+                nombre=nombre,
+                descripcion=descripcion,
+                precio_compra=precio_compra,       # Tu SQL usa precio_compra
+                precio_venta=precio_venta,         # Tu SQL usa precio_venta
+                stock=stock,                       # Faltaba
+                stock_minimo=stock_minimo,         # Faltaba
+                imagen=imagen,                     # Faltaba manejar el archivo
+                activo=activo,                     # Faltaba
+                categoria_id=categoria_id
+            )
+            
+            return redirect('/productos')
+            
+        except Exception as e:
+            print(f"Error al crear producto: {e}")
+            return redirect('/index')
+    else:
+        return redirect('/index')
+
+def clientes(request):
+    clientes = Cliente.objects.all()
+    tipo = tipo_documnento.objects.all()
     context = {
-        'segment': 'dynamic_dt'
+        'segment': 'clientes',
+        'clientes': clientes,
+        'tipos_documento': tipo
     }
-    return render(request, 'dyn_dt/index.html', context)
+    return render(request, 'Clientes/index.html', context)
+
+def registrar_clientes(request):
+    if request.method == 'POST':
+        id_tipo_doc = request.POST.get('tipo_documento')
+        numero_documento = request.POST.get('numero_documento')
+        nombre = request.POST.get('nombre_apellido')
+        
+        email = request.POST.get('email')
+        telefono = request.POST.get('telefono') 
+        direccion = request.POST.get('direccion')
+        fecha_registro = request.POST.get('fecha_registro')
+        esta_activo = True if request.POST.get('activo') == '1' else False
+        
+        
+        try:
+           new_client = Cliente.objects.create(
+                tipo_documento_id=id_tipo_doc,
+                numero_documento=numero_documento,
+                nombre=nombre,
+                apellidos="",
+                email=email,
+                telefono=telefono,
+                direccion=direccion,
+                fecha_registro=fecha_registro,
+                activo=esta_activo
+            )
+           new_client.save()
+           print('Client created successfully!')
+           return redirect('/clientes')
+        except Exception as e:
+            print(f"Error creating client: {e}")
+            return redirect('/index')
+    else:
+        print("Invalid request method!")
+        return redirect('/index')
 
 def charts(request):
     context = {
