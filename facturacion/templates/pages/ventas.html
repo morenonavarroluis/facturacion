@@ -1,0 +1,139 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-file-invoice-dollar me-2"></i> Registrar Nueva Venta
+          </h5>
+        </div>
+        
+        <form method="post" action="{% url 'crear_factura' %}">
+          {% csrf_token %}
+          <div class="card-body p-4">
+            <div class="row">
+              <div class="col-md-8 mb-4">
+                <label for="cliente" class="form-label fw-bold">Seleccionar Cliente</label>
+                <select name="cliente" class="form-select" id="cliente" required>
+                  <option value="" selected disabled>Buscar cliente...</option>
+                  {% for c in clientes %}
+                    <option value="{{ c.id }}">{{ c.nombre }} {{ c.apellidos }} - {{ c.numero_documento }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-4 mb-4 text-end">
+                <label class="form-label d-block">&nbsp;</label>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#clientes">
+                  + Nuevo Cliente
+                </button>
+              </div>
+
+              <hr>
+
+              <div class="col-md-12">
+                <h6 class="mb-3 text-secondary">Productos en la Venta</h6>
+                <div class="table-responsive">
+                  <table class="table align-items-center" id="tabla-productos">
+                    <thead class="bg-light">
+                      <tr>
+                        <th style="width: 50%">Producto</th>
+                        <th style="width: 20%">Cantidad</th>
+                        <th style="width: 20%">Precio Unitario</th>
+                        <th style="width: 10%">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody id="body-venta">
+                      <tr class="fila-producto">
+                        <td>
+                          <select name="producto_id[]" class="form-select select-producto" required>
+                            <option value="" selected disabled>Seleccionar...</option>
+                            {% for p in productos %}
+                              <option value="{{ p.id }}" data-precio="{{ p.precio_venta }}">
+                                {{ p.nombre }} (Stock: {{ p.stock }})
+                              </option>
+                            {% endfor %}
+                          </select>
+                        </td>
+                        <td>
+                          <input type="number" name="cantidad[]" class="form-control" value="1" min="1" required>
+                        </td>
+                        <td>
+                          <input type="text" class="form-control precio-visual" readonly placeholder="$ 0.00">
+                        </td>
+                        <td>
+                          <button type="button" class="btn btn-link text-danger remove-row"><i class="fas fa-trash"></i></button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <button type="button" class="btn btn-dark btn-sm mt-2" id="add-product">
+                  <i class="fas fa-plus me-1"></i> Agregar Item
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer bg-light text-end">
+            <a href="{% url 'facturas' %}" class="btn btn-outline-secondary px-4 me-2">Cancelar</a>
+            <button type="submit" class="btn btn-success px-5 shadow-sm">
+              <i class="fas fa-check-circle me-1"></i> Procesar Factura
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include "modales/clientes.html" %}
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tableBody = document.getElementById('body-venta');
+    const addButton = document.getElementById('add-product');
+
+    // Función para actualizar precio visual al seleccionar producto
+    tableBody.addEventListener('change', function(e) {
+        if (e.target.classList.contains('select-producto')) {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const precio = selectedOption.getAttribute('data-precio');
+            const row = e.target.closest('tr');
+            row.querySelector('.precio-visual').value = `$ ${precio}`;
+        }
+    });
+
+    // Agregar nueva fila
+    addButton.addEventListener('click', function() {
+        const firstRow = document.querySelector('.fila-producto');
+        const newRow = firstRow.cloneNode(true);
+        
+        // Limpiar valores en la nueva fila
+        newRow.querySelector('.select-producto').selectedIndex = 0;
+        newRow.querySelector('input[name="cantidad[]"]').value = 1;
+        newRow.querySelector('.precio-visual').value = '';
+        
+        tableBody.appendChild(newRow);
+    });
+
+    // Eliminar fila (excepto si es la única)
+    tableBody.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-row')) {
+            const rows = document.querySelectorAll('.fila-producto');
+            if (rows.length > 1) {
+                e.target.closest('tr').remove();
+            } else {
+                alert("La factura debe tener al menos un producto.");
+            }
+        }
+    });
+});
+</script>
+{% endblock extra_js %}

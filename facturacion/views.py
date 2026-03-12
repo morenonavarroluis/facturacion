@@ -1,11 +1,16 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 from .forms import LoginForm, RegistrationForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout
 from django.contrib.auth import views as auth_views
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import *
 from .models import *
-# Create your views here.
+from django.db import transaction
+from django.utils import timezone
+from decimal import Decimal
+from django.shortcuts import redirect
+from .models import Producto, Categoria
+
 
 def login(request):
   if request.method == 'POST':
@@ -40,8 +45,7 @@ def productos(request):
     }
     return render(request, 'Productos/index.html', context)
 
-from django.shortcuts import redirect
-from .models import Producto, Categoria
+
 
 def crear_producto(request):
     if request.method == 'POST':
@@ -135,13 +139,13 @@ def charts(request):
     }
     return render(request, 'charts/index.html', context)
 
-def tables(request):
+def usuarios(request):
     usuarios = User.objects.all()
     context = {
-        'segment': 'tables',
+        'segment': 'usuarios',
         'usuarios': usuarios
     }
-    return render(request, 'pages/tables.html', context)
+    return render(request, 'pages/usuarios.html', context)
 
 def registrar_usuario(request):
     if request.method == 'POST':
@@ -165,15 +169,118 @@ def registrar_usuario(request):
     else:
         print("Invalid request method!")
         return redirect('/index')
-        
-    
 
+
+def facturas(request):
+    todas_las_facturas = Factura.objects.all().order_by('-fecha_emision')
+    context = {
+        'segment': 'facturas',
+        'facturas': todas_las_facturas
+    }
+    return render(request, 'facturas/facturas_list.html', context)
+    
+def crear_factura(request):
+    if request.method == 'POST':
+        # 1. Obtener datos básicos
+        cliente_id = request.POST.get('cliente')
+        # Para el número de factura, buscamos la última y sumamos 1
+        ultima_factura = Factura.objects.last()
+        nuevo_numero = 1 if not ultima_factura else int(ultima_factura.numero_factura) + 1
+        
+        # 2. Obtener listas de productos (desde el frontend)
+        productos_ids = request.POST.getlist('producto_id[]')
+        cantidades = request.POST.getlist('cantidad[]')
+        
+        try:
+            # Usamos una transacción para que si algo falla, no se guarde nada
+            with transaction.atomic():
+                # Creamos la cabecera de la factura primero con valores en 0
+                nueva_factura = Factura.objects.create(
+                    numero_factura=str(nuevo_numero).zfill(8), # Ej: 00000001
+                    tipo_comprobante="FACTURA",
+                    fecha_emision=timezone.now(),
+                    subtotal=0,
+                    igv=0,
+                    total=0,
+                    estado="PAGADO",
+                    cliente_id=cliente_id,
+                    usuario=request.user
+                )
+
+                total_subtotal = Decimal('0.00')
+                tasa_iva = Decimal('0.16') # 16% IVA Venezuela
+
+                for p_id, cant in zip(productos_ids, cantidades):
+                    producto = Producto.objects.get(id=p_id)
+                    cantidad = int(cant)
+                    
+                    if producto.stock < cantidad:
+                        raise Exception(f"Stock insuficiente para {producto.nombre}")
+                    p_subtotal = producto.precio_venta * cantidad
+                    
+                    # Crear el detalle
+                    DetalleFactura.objects.create(
+                        factura=nueva_factura,
+                        producto=producto,
+                        cantidad=cantidad,
+                        precio_unitario=producto.precio_venta,
+                        subtotal=p_subtotal
+                    )
+
+                    # Descontar Stock
+                    producto.stock -= cantidad
+                    producto.save()
+
+                    total_subtotal += p_subtotal
+
+                # 3. Cálculos Finales de la Factura
+                impuesto = total_subtotal * tasa_iva
+                total_final = total_subtotal + impuesto
+
+                # Actualizamos la cabecera con los totales reales
+                nueva_factura.subtotal = total_subtotal
+                nueva_factura.igv = impuesto
+                nueva_factura.total = total_final
+                nueva_factura.save()
+
+            return redirect('/facturas') # O a la vista de impresión
+
+        except Exception as e:
+            print(f"Error en facturación: {e}")
+            return redirect('/index')
+            
+    return redirect('facturas/index.html')
 
 def billing(request):
     context = {
         'segment': 'billing'
     }
     return render(request, 'pages/billing.html', context)
+
+def venta(request):
+    productos_disponibles = Producto.objects.filter(activo=True, stock__gt=0)
+    clientes = Cliente.objects.all()
+    tipo = tipo_documnento.objects.all()
+    context = {
+        'segment': 'clientes',
+        'productos': productos_disponibles,
+        'clientes': clientes,
+        'tipos_documento': tipo
+    }
+    return render(request, 'pages/ventas.html', context)
+
+def detalle_factura(request, factura_id):
+    # Buscamos la factura o devolvemos 404 si no existe
+    factura = get_object_or_404(Factura, id=factura_id)
+    # Filtramos los productos que se vendieron en esa factura específica
+    detalles = DetalleFactura.objects.filter(factura=factura)
+    
+    context = {
+        'segment': 'facturas',
+        'factura': factura,
+        'detalles': detalles
+    }
+    return render(request, 'pages/detalle_factura.html', context)
 
 def virtual_reality(request):
     context = {
@@ -225,37 +332,30 @@ def template(request):
     return render(request, 'pages/template.html', context)
 
 
+def registrar_compra(request):
+    if request.method == 'POST':
+        producto_id = request.POST.get('producto_id')
+        cantidad_comprada = int(request.POST.get('cantidad'))
+        costo_unitario = Decimal(request.POST.get('precio_compra'))
 
-
-# def register(request):
-#   if request.method == 'POST':
-#     form = RegistrationForm(request.POST)
-#     if form.is_valid():
-#       form.save()
-#       print('Account created successfully!')
-#       return redirect('/accounts/login/')
-#     else:
-#       print("Registration failed!")
-#   else:
-#     form = RegistrationForm()
-  
-#   context = {'form': form}
-#   return render(request, 'pages/sign-up.html', context)
-
-
-# class UserPasswordResetView(auth_views.PasswordResetView):
-#   template_name = 'accounts/forgot-password.html'
-#   form_class = UserPasswordResetForm
-
-
-# class UserPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
-#   template_name = 'accounts/recover-password.html'
-#   form_class = UserSetPasswordForm
-
-
-# class UserPasswordChangeView(auth_views.PasswordChangeView):
-#   template_name = 'accounts/password_change.html'
-#   form_class = UserPasswordChangeForm
+        try:
+            with transaction.atomic():
+                producto = Producto.objects.get(id=producto_id)
+                
+                # Actualizamos el stock (Trazabilidad de entrada)
+                producto.stock += cantidad_comprada
+                
+                # Opcional: Actualizamos el precio de compra si cambió
+                producto.precio_compra = costo_unitario
+                producto.save()
+                
+                # Aquí podrías crear un modelo 'IngresoStock' para historial detallado
+                print(f"Entrada de stock: {producto.nombre} +{cantidad_comprada}")
+                
+            return redirect('/productos')
+        except Exception as e:
+            print(f"Error en compra: {e}")
+            return redirect('/index')
 
 
 def user_logout_view(request):

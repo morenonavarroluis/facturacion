@@ -8,7 +8,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('', RedirectView.as_view(url='login/', permanent=False), name='index'),
     path('index', views.index, name="index"),
-    path('tables/', views.tables, name="tables"),
+    path('usuarios/', views.usuarios, name="usuarios"),
     path('registrar_usuario/', views.registrar_usuario, name="registrar_usuario"),
     path('billing/', views.billing, name="billing"),
     path('virtual-reality/', views.virtual_reality, name="virtual_reality"),
@@ -24,22 +24,22 @@ urlpatterns = [
     path('clientes/', views.clientes, name="clientes"),
     path('registrar_clientes/', views.registrar_clientes, name="registrar_clientes"),
     path('charts/', views.charts, name="charts"),
+    
+    # Facturación
+    path('facturas/', views.facturas, name="facturas"),
+    path('crear_factura/', views.crear_factura, name="crear_factura"),
 
+    # Compras / Trazabilidad de entrada
+    path('registrar_compra/', views.registrar_compra, name="registrar_compra"),
+    
+    # venta / Trazabilidad de salida
+    path('nueva_venta/', views.venta, name="nueva_venta"),
+
+    path('detalle_factura/<int:factura_id>/', views.detalle_factura, name="detalle_factura"),
+    
     # Authentication
     path('login/', views.login, name='login'),
-    # path('register/', views.register, name='register'),
+
      path('logout/', views.user_logout_view, name='logout'),
-    # path('password-change/', views.UserPasswordChangeView.as_view(), name='password_change'),
-    # path('password-change-done/', auth_views.PasswordChangeDoneView.as_view(
-    #     template_name='pages/password_change_done.html'
-    # ), name="password_change_done" ),
-    # path('accounts/password-reset/', views.UserPasswordResetView.as_view(), name='password_reset'),
-    # path('accounts/password-reset-confirm/<uidb64>/<token>/', 
-    #     views.UserPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    # path('accounts/password-reset-done/', auth_views.PasswordResetDoneView.as_view(
-    #     template_name='pages/password_reset_done.html'
-    # ), name='password_reset_done'),
-    # path('accounts/password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(
-    #     template_name='pages/password_reset_complete.html'
-    # ), name='password_reset_complete'),
+   
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
