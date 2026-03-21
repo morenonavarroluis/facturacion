@@ -47,6 +47,7 @@ def productos(request):
 
 
 
+
 def crear_producto(request):
     if request.method == 'POST':
         # 1. Captura de todos los campos del formulario
@@ -332,6 +333,7 @@ def template(request):
     return render(request, 'pages/template.html', context)
 
 
+
 def registrar_compra(request):
     if request.method == 'POST':
         producto_id = request.POST.get('producto_id')
@@ -357,6 +359,8 @@ def registrar_compra(request):
             print(f"Error en compra: {e}")
             return redirect('/index')
 
+def editar_perfil(request):
+    pass
 
 def user_logout_view(request):
   logout(request)

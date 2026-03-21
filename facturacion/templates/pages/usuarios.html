@@ -2,83 +2,85 @@
 {% load static %}
 
 {% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card my-4">
+        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+          <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3 d-flex align-items-center justify-content-between px-3">
+            <h6 class="text-white text-capitalize ps-3 m-0">Gestión de Usuarios</h6>
+            <button class="btn btn-white btn-sm mb-0 me-3" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <i class="bi bi-person-plus-fill me-1"></i> Registrar Usuario
+            </button>
+          </div>
+        </div>
+        
+        {% include 'modales/registrar_user.html' %}
 
-    <div class="container-fluid py-2">
-      <div class="row">
-        <div class="col-12">
-          <div class="card my-4">
-            <div class="card-header p-0 position-relative mt-n4  z-index-2">
-              <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3 d-flex align-items-center justify-content-between px-3">
-                <h6 class="text-white text-capitalize m-0">Usuarios</h6>
-                
-                <div>
-                  <button class="btn btn-primary btn-sm mb-0" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    Registrar Usuarios
-                  </button>
+        <div class="card-body px-0 pb-2">
+          <div class="container-fluid py-2">
+            <div class="row">
+              {% for usuario in usuarios %}
+              <div class="col-xl-3 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 border shadow-sm border-radius-lg overflow-hidden">
+                  
+                  <div class="text-center pt-4 bg-light">
+                    {% if usuario.perfil.imagen %}
+                      <img src="{{ usuario.perfil.imagen.url }}" class="avatar avatar-xxl shadow-sm border-radius-section" alt="user-img">
+                    {% else %}
+                      <div class="avatar avatar-xxl bg-gradient-secondary shadow-sm d-inline-flex align-items-center justify-content-center text-white border-radius-lg">
+                        <span class="h4 m-0 text-white">{{ usuario.username|slice:":1"|upper }}</span>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <div class="card-body text-center pt-3">
+                    <p class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                      {{ usuario.groups.first.name|default:"Sin Rol" }}
+                    </p>
+                    <h5 class="font-weight-bolder mb-0">
+                      {{ usuario.get_full_name|default:usuario.username }}
+                    </h5>
+                    <p class="text-sm text-secondary mb-3">@{{ usuario.username }}</p>
+                    
+                    <hr class="horizontal dark my-2">
+
+                    <div class="d-flex justify-content-between px-2">
+                      <span class="text-xs text-secondary">Email:</span>
+                      <span class="text-xs font-weight-bold">{{ usuario.email|truncatechars:20 }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between px-2">
+                      <span class="text-xs text-secondary">Estado:</span>
+                      {% if usuario.is_active %}
+                        <span class="badge badge-sm bg-gradient-success">Activo</span>
+                      {% else %}
+                        <span class="badge badge-sm bg-gradient-secondary">Inactivo</span>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="card-footer d-flex justify-content-around bg-transparent border-top-0 pt-0">
+                    <button class="btn btn-link text-dark px-3 mb-0" title="Editar">
+                      <i class="bi bi-pencil-square text-sm me-1"></i>
+                    </button>
+                    <button class="btn btn-link text-danger px-3 mb-0" title="Eliminar">
+                      <i class="bi bi-trash-fill text-sm me-1"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-             {% include 'modales/registrar_user.html' %}
-            </div>
-            <div class="card-body px-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nombre</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Usuario</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Employed</th>
-                      <th class="text-secondary opacity-7">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    
-                  {% for usuario in usuarios %}
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div>
-                            <img src="{% static 'assets/img/team-2.jpg' %}" class="avatar avatar-sm me-3 border-radius-lg" alt="user_image">
-                          </div>
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">{{ usuario.first_name }} {{ usuario.last_name }}</h6>
-                            <p class="text-xs text-secondary mb-0">{{ usuario.email }}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-xs font-weight-bold mb-0">{{ usuario.username }}</p>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        {% if usuario.is_active %}
-                          <span class="badge badge-sm bg-gradient-success">Activo</span>
-                        {% else %}
-                          <span class="badge badge-sm bg-gradient-secondary">Inactivo</span>
-                        {% endif %}
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">
-                          {{ usuario.date_joined|date:"d/m/y" }}
-                        </span>
-                      </td>
-                      <td class="align-middle">
-                        <a href="" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" title="Editar usuario">
-                          Editar
-                        </a>
-                      </td>
-                    </tr>
-                    {% endfor %}
-                                      
-                  </tbody>
-                </table>
+              {% empty %}
+              <div class="col-12 text-center py-5">
+                <i class="bi bi-people text-secondary" style="font-size: 3rem;"></i>
+                <h4 class="text-secondary mt-3">No hay usuarios registrados</h4>
               </div>
+              {% endfor %}
             </div>
           </div>
         </div>
       </div>
-     
-      {% include "includes/footer.html" %}
     </div>
-  
+  </div>
+  {% include "includes/footer.html" %}
+</div>
 {% endblock content %}

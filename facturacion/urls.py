@@ -15,6 +15,7 @@ urlpatterns = [
     path('rtl/', views.rtl, name="rtl"),
     path('notifications/', views.notifications, name="notifications"),
     path('profile/', views.profile, name="profile"),
+    path('editar_perfil/', views.editar_perfil, name="editar_perfil"),
     path('map/', views.map, name="map"),
     path('icons/', views.icons, name="icons"),
     path('typography/', views.typography, name="typography"),
