@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect,get_object_or_404
+from django.contrib import messages
 from .forms import LoginForm, RegistrationForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout
 from django.contrib.auth import views as auth_views
@@ -44,9 +45,6 @@ def productos(request):
         'categorias': categorias
     }
     return render(request, 'Productos/index.html', context)
-
-
-
 
 def crear_producto(request):
     if request.method == 'POST':
@@ -171,6 +169,34 @@ def registrar_usuario(request):
         print("Invalid request method!")
         return redirect('/index')
 
+def editar_usuario(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        
+        try:
+            user = User.objects.get(id=user_id)
+            user.first_name = request.POST.get('first_name')
+            user.last_name = request.POST.get('last_name')
+            user.email = request.POST.get('email')
+            user.username = request.POST.get('username')
+            
+            # Validación simple
+            if not all([user.first_name, user.last_name, user.email, user.username]):
+                messages.error(request, "Todos los campos son obligatorios.")
+                return redirect('/tables')
+
+            user.save()
+            messages.success(request, '¡Usuario actualizado correctamente!')
+            return redirect('/tables')
+            
+        except User.DoesNotExist:
+            messages.error(request, "Usuario no encontrado.")
+        except Exception as e:
+            messages.error(request, f"Error: {e}")
+        
+        return redirect('/tables')
+    
+    return redirect('/index')
 
 def facturas(request):
     todas_las_facturas = Factura.objects.all().order_by('-fecha_emision')
@@ -253,17 +279,28 @@ def crear_factura(request):
     return redirect('facturas/index.html')
 
 def billing(request):
+    # Obtenemos las últimas 5 facturas
+    facturas = Factura.objects.all().order_by('-fecha_emision')[:5]
+    
+    # Obtenemos los clientes para la sección "Billing Information"
+    clientes_billing = Cliente.objects.filter(activo=True)[:3]
+    
+    # Calculamos algunos totales para las tarjetas superiores (opcional)
+    total_ingresos = sum(f.total for f in Factura.objects.filter(estado='Pagado'))
+
     context = {
-        'segment': 'billing'
+        'facturas': facturas,
+        'clientes': clientes_billing,
+        'total_ingresos': total_ingresos,
     }
     return render(request, 'pages/billing.html', context)
 
-def venta(request):
+def nueva_venta(request):
     productos_disponibles = Producto.objects.filter(activo=True, stock__gt=0)
     clientes = Cliente.objects.all()
     tipo = tipo_documnento.objects.all()
     context = {
-        'segment': 'clientes',
+        'segment': 'nueva_venta',
         'productos': productos_disponibles,
         'clientes': clientes,
         'tipos_documento': tipo
@@ -306,32 +343,6 @@ def profile(request):
         'segment': 'profile'
     }
     return render(request, 'pages/profile.html', context)
-
-
-def map(request):
-    context = {
-        'segment': 'map'
-    }
-    return render(request, 'pages/map.html', context)
-
-def typography(request):
-    context = {
-        'segment': 'typography'
-    }
-    return render(request, 'pages/typography.html', context)
-
-def icons(request):
-    context = {
-        'segment': 'icons'
-    }
-    return render(request, 'pages/icons.html', context)
-
-def template(request):
-    context = {
-        'segment': 'template'
-    }
-    return render(request, 'pages/template.html', context)
-
 
 
 def registrar_compra(request):

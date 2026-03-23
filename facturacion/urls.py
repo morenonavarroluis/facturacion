@@ -10,16 +10,13 @@ urlpatterns = [
     path('index', views.index, name="index"),
     path('usuarios/', views.usuarios, name="usuarios"),
     path('registrar_usuario/', views.registrar_usuario, name="registrar_usuario"),
+    path('editar_usuario/', views.editar_usuario, name='editar_usuario'),
     path('billing/', views.billing, name="billing"),
     path('virtual-reality/', views.virtual_reality, name="virtual_reality"),
     path('rtl/', views.rtl, name="rtl"),
     path('notifications/', views.notifications, name="notifications"),
     path('profile/', views.profile, name="profile"),
     path('editar_perfil/', views.editar_perfil, name="editar_perfil"),
-    path('map/', views.map, name="map"),
-    path('icons/', views.icons, name="icons"),
-    path('typography/', views.typography, name="typography"),
-    path('template/', views.template, name="template"),
     path('productos/', views.productos, name="productos"),
     path('crear_producto/', views.crear_producto, name="crear_producto"),
     path('clientes/', views.clientes, name="clientes"),
@@ -34,7 +31,7 @@ urlpatterns = [
     path('registrar_compra/', views.registrar_compra, name="registrar_compra"),
     
     # venta / Trazabilidad de salida
-    path('nueva_venta/', views.venta, name="nueva_venta"),
+    path('nueva_venta/', views.nueva_venta, name="nueva_venta"),
 
     path('detalle_factura/<int:factura_id>/', views.detalle_factura, name="detalle_factura"),
     
